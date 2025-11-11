@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - EVANGELICAL BUSINESS</title>
+    <style>
+        :root {
+            --primary-yellow: #ffc400; /* Jaune EB */
+            --primary-blue: #000080; /* Bleu marine EB */
+            --green-btn: #28a745;
+            --dark-gray: #333;
+            --light-gray: #f4f4f4;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* 1. En-tête (Référence Image) */
+        .header-top {
+            background-color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap; /* Pour la réactivité */
+        }
+        .header-logo {
+            width: 50px; /* Ajustez la taille du logo */
+            height: 50px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .wallet-display {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+        .user-button {
+            background-color: var(--green-btn);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        /* 2. Slogan et Accès Rapide */
+        .hero-section {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .slogan {
+            font-size: 2em;
+            font-weight: 300;
+            margin-bottom: 25px;
+            line-height: 1.2;
+        }
+        .slogan strong {
+            font-weight: 700;
+            color: var(--primary-yellow);
+        }
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .quick-link-item {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .quick-link-item:hover {
+            background-color: var(--primary-yellow);
+            color: var(--primary-blue);
+        }
+
+        /* 3. Conteneur des sections (Flyers) */
+        .content-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .section-flyer {
+            text-decoration: none;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .section-flyer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .flyer-content {
+            padding: 20px;
+        }
+        .flyer-title {
+            color: var(--primary-blue);
+            font-size: 1.5em;
+            margin-top: 0;
+        }
+        .flyer-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* 4. Footer */
+        .footer {
+            background-color: #222;
+            color: #ccc;
+            padding: 40px 20px;
+            font-size: 0.9em;
+            border-top: 5px solid var(--primary-yellow);
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 20px;
+        }
+        .footer h4 {
+            color: var(--primary-yellow);
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .footer ul li a:hover {
+            color: var(--primary-yellow);
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            margin-top: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .user-info {
+                width: 100%;
+                justify-content: space-around;
+            }
+            .slogan {
+                font-size: 1.5em;
+            }
+            .quick-links {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-top">
+        <img class="header-logo" src="https://i.postimg.cc/YSMxxFXr/IMG-20251111-WA0000.jpg" alt="Logo EB">
+        <div class="user-info">
+            <div class="wallet-display">
+                <span id="user-solde">... HTE</span> </div>
+            <a href="#" class="user-button" id="user-account-link">Mon compte</a>
+            <a href="https://eb.mijocomplexe.workers.dev/logout" class="user-button" style="background-color: #dc3545;">Déconnexion</a>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <p class="slogan">« Pour un Haïti plus simple, plus rapide, <strong>plus ouvert</strong> »</p>
+        <h2>Accès Rapide</h2>
+        <div class="quick-links">
+            <a href="#marketplace" class="quick-link-item">Marketplace</a>
+            <a href="#chauffeurs" class="quick-link-item">Chauffeurs</a>
+            <a href="#livraison" class="quick-link-item">Livraison</a>
+            <a href="#ebwallet" class="quick-link-item">EB Wallet</a>
+            <a href="#ebacademy" class="quick-link-item">EB Academy</a>
+            <a href="#ebagency" class="quick-link-item">EB Agency</a>
+            <a href="#ebrise" class="quick-link-item">EB Rise</a>
+        </div>
+    </section>
+
+    <main class="content-container">
+        <h2>Promotions & Nouveautés</h2>
+        <div class="section-grid">
+            <a href="#" class="section-flyer" id="ebwallet">
+                <img class="flyer-image" src="https://i.postimg.cc/26B1y2b3/wallet-concept.jpg" alt="EB Wallet">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">EB Wallet : Votre Portefeuille Numérique</h3>
+                    <p>Gérez vos transactions, consultez votre historique et transférez des fonds en toute sécurité.</p>
+                </div>
+            </a>
+            
+            <a href="#" class="section-flyer" id="marketplace">
+                <img class="flyer-image" src="https://i.postimg.cc/sX157vXG/marketplace.jpg" alt="Marketplace">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">Marketplace : Achetez, Vendez, Échangez</h3>
+                    <p>Découvrez les meilleures offres et soutenez les entreprises évangéliques locales.</p>
+                </div>
+            </a>
+            
+            <a href="#" class="section-flyer" id="ebacademy">
+                <img class="flyer-image" src="https://i.postimg.cc/Nj6g0NmL/academy.jpg" alt="EB Academy">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">EB Academy : Formez-vous au succès</h3>
+                    <p>Accédez à des cours exclusifs sur l'entrepreneuriat, la finance et la croissance personnelle.</p>
+                </div>
+            </a>
+
+             <a href="#" class="section-flyer" id="chauffeurs">
+                <img class="flyer-image" src="https://i.postimg.cc/rF4Xg259/chauffeur.jpg" alt="Chauffeurs">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">Chauffeurs : Déplacez-vous facilement</h3>
+                    <p>Réservez un chauffeur fiable et sécurisé pour tous vos déplacements en Haïti.</p>
+                </div>
+            </a>
+            
+            <a href="#" class="section-flyer" id="livraison">
+                <img class="flyer-image" src="https://i.postimg.cc/zXp240rS/delivery.jpg" alt="Livraison">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">Livraison : Recevez vos colis rapidement</h3>
+                    <p>Notre service de livraison rapide et sécurisé pour vos achats en ligne et vos envois.</p>
+                </div>
+            </a>
+            
+             <a href="#" class="section-flyer" id="ebagency">
+                <img class="flyer-image" src="https://i.postimg.cc/7h1w059S/agency.jpg" alt="EB Agency">
+                <div class="flyer-content">
+                    <h3 class="flyer-title">EB Agency : Propulsez votre marque</h3>
+                    <p>Des solutions marketing et de gestion pour les entreprises qui veulent grandir.</p>
+                </div>
+            </a>
+        </div>
+        
+        <h2 id="pourquoi-eb">Section “Pourquoi EB ?”</h2>
+        <div style="background-color: var(--light-gray); padding: 30px; border-radius: 12px; margin-bottom: 50px;">
+            <p style="font-size: 1.1em;">EVANGELICAL BUSINESS n'est pas qu'une plateforme, c'est une communauté et un écosystème conçu pour la prospérité en Haïti. Nous combinons technologie, éthique et engagement local pour vous offrir des services de qualité, simples et transparents.</p>
+            <p><strong>Nos valeurs :</strong> Foi, Intégrité, Innovation, Excellence et Impact Social.</p>
+        </div>
+
+        <h2>Témoignages & Partenaires</h2>
+        <div style="text-align: center; color: #888;">
+            <p>Espace à venir pour les logos des partenaires et les citations de témoignages clients.</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <h4>EVANGELICAL BUSINESS</h4>
+                <ul>
+                    <li><a href="#pourquoi-eb">Pourquoi EB ?</a></li>
+                    <li><a href="#">Notre Mission</a></li>
+                    <li><a href="#">Carrières</a></li>
+                    <li><a href="#">Contactez-nous</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Services Clés</h4>
+                <ul>
+                    <li><a href="#ebwallet">EB Wallet</a></li>
+                    <li><a href="#marketplace">Marketplace</a></li>
+                    <li><a href="#chauffeurs">Chauffeurs</a></li>
+                    <li><a href="#ebacademy">EB Academy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Centre d'aide</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Politique de confidentialité</a></li>
+                    <li><a href="#">Conditions d'utilisation</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Nous Suivre</h4>
+                <p>Restez connecté(e) pour les dernières nouveautés.</p>
+                <p>@EvangelicalBusiness</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 EVANGELICAL BUSINESS. Tous droits réservés.
+        </div>
+    </footer>
+
+    <script>
+        const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
+
+        async function fetchUserData() {
+            try {
+                // Appel à l'endpoint sécurisé du Worker
+                const response = await fetch(`${WORKER_URL}/api/user`);
+
+                if (response.status === 401) {
+                    // Session expirée ou non autorisée
+                    console.error("Session expirée. Redirection vers la page de connexion.");
+                    window.location.href = `${WORKER_URL}/index.html`;
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données utilisateur.');
+                }
+
+                const data = await response.json();
+                
+                // 1. Afficher le solde
+                const soldeElement = document.getElementById('user-solde');
+                // Formater le solde avec une virgule et deux décimales, si nécessaire, ou simplement afficher l'entier.
+                const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(data.solde || 0);
+                soldeElement.textContent = `${formattedSolde} HTE`;
+
+                // 2. Afficher l'email ou le statut dans le bouton "Mon compte"
+                const accountLink = document.getElementById('user-account-link');
+                accountLink.textContent = data.email || "Mon compte";
+
+            } catch (error) {
+                console.error('Erreur API:', error);
+                // Si l'API échoue pour une raison inconnue, on affiche une erreur générique
+                document.getElementById('user-solde').textContent = 'Erreur';
+                document.getElementById('user-account-link').textContent = 'Erreur';
+            }
+        }
+
+        // Exécuter la fonction au chargement de la page
+        document.addEventListener('DOMContentLoaded', fetchUserData);
+        
+        // Gérer la déconnexion sur le bouton dédié
+        document.getElementById('user-account-link').addEventListener('click', (e) => {
+            // Ici, vous pouvez rediriger l'utilisateur vers une page de profil ou de paramètres
+            e.preventDefault(); 
+            alert("Redirection vers la page Mon Compte ou Profil. (Non implémentée)");
+        });
+    </script>
+</body>
+</html>
