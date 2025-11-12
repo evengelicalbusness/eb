@@ -336,78 +336,94 @@
         </div>
     </footer>
 
-    <script>
-        // URL du Worker reste correcte pour les appels API
-const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
-const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html';
+   <script>
+    // Configuration
+    const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
+    const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html';
 
-// 1. Fonction pour extraire le token de l'URL et le stocker
-function processTokenFromUrl() {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const token = params.get('token');
+    // 1. Gère le Token de la Redirection (URL Hash)
+    function processTokenFromUrl() {
+        const hash = window.location.hash.substring(1); // Récupère le contenu après le '#'
+        const params = new URLSearchParams(hash);
+        const token = params.get('token');
 
-    if (token) {
-        // Stocke le token pour les appels futurs
-        localStorage.setItem('eb_session_token', token);
-        // Nettoie l'URL pour la sécurité et la propreté (enlève le #token=...)
-        window.location.hash = ''; 
-    }
-}
-
-async function fetchUserData() {
-    // S'assurer que nous avons vérifié le token dans l'URL avant de faire l'appel
-    processTokenFromUrl(); 
-    
-    const token = localStorage.getItem('eb_session_token');
-
-    if (!token) {
-        // Si aucun token, même après vérification d'URL, on redirige
-        window.location.href = GITHUB_LOGIN_URL;
-        return;
+        if (token) {
+            // Stocke le token pour les appels futurs (Local Storage)
+            localStorage.setItem('eb_session_token', token);
+            
+            // Nettoie l'URL pour la sécurité et la propreté (enlève le #token=...)
+            // Cela ne recharge pas la page.
+            window.history.replaceState(null, null, ' ');
+            return true; // Token trouvé
+        }
+        return false; // Pas de token
     }
 
-    try {
-        // ⭐ Appel à l'endpoint en envoyant le Token dans l'en-tête Authorization
-        const response = await fetch(`${WORKER_URL}/api/user`, {
-            headers: {
-                'Authorization': `Bearer ${token}` 
+    // 2. Appel de l'API avec le Token
+    async function fetchUserData() {
+        
+        // Tente de récupérer un token si on vient d'être redirigé par le Worker
+        processTokenFromUrl(); 
+        
+        // Récupère le token stocké
+        const token = localStorage.getItem('eb_session_token');
+
+        if (!token) {
+            // Si pas de token, on redirige vers la page de connexion
+            window.location.href = GITHUB_LOGIN_URL;
+            return;
+        }
+
+        try {
+            // ⭐ ENVOI DU TOKEN DANS L'EN-TÊTE AUTHORIZATION
+            const response = await fetch(`${WORKER_URL}/api/user`, {
+                headers: {
+                    'Authorization': `Bearer ${token}` 
+                }
+            });
+
+            // Gère la déconnexion en cas d'expiration du token
+            if (response.status === 401) {
+                 console.error("Session expirée. Redirection vers la page de connexion.");
+                 localStorage.removeItem('eb_session_token'); // Supprime le token invalide
+                 window.location.href = GITHUB_LOGIN_URL;
+                 return;
             }
-        });
+            
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données utilisateur.');
+            }
 
-        // Le reste de la logique de gestion des réponses reste la même...
-        if (response.status === 401) {
-             console.error("Session expirée. Redirection vers la page de connexion.");
-             localStorage.removeItem('eb_session_token'); // Supprime le token invalide
-             window.location.href = GITHUB_LOGIN_URL;
-             return;
+            const data = await response.json();
+            
+            // 1. Afficher le solde
+            const soldeElement = document.getElementById('user-solde');
+            const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
+            
+            // Formatage du solde
+            const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
+            soldeElement.textContent = `${formattedSolde} HTE`;
+
+            // 2. Afficher l'email
+            document.getElementById('user-account-link').textContent = data.email || "Mon compte";
+
+        } catch (error) {
+            console.error('Erreur API:', error);
+            document.getElementById('user-solde').textContent = 'Erreur';
+            document.getElementById('user-account-link').textContent = 'Erreur';
         }
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors de la récupération des données utilisateur.');
-        }
-
-        const data = await response.json();
-        
-        // 1. Afficher le solde
-        const soldeElement = document.getElementById('user-solde');
-        const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
-        const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
-        soldeElement.textContent = `${formattedSolde} HTE`;
-
-        // 2. Afficher l'email
-        document.getElementById('user-account-link').textContent = data.email || "Mon compte";
-
-    } catch (error) {
-        console.error('Erreur API:', error);
-        document.getElementById('user-solde').textContent = 'Erreur';
-        document.getElementById('user-account-link').textContent = 'Erreur';
     }
-}
+    
+    // ⭐ 3. Gère la Déconnexion (suppression du token local)
+    document.getElementById('logout-link').addEventListener('click', (e) => {
+        e.preventDefault(); // Empêche l'action par défaut du lien
+        localStorage.removeItem('eb_session_token'); // Supprime le token
+        window.location.href = GITHUB_LOGIN_URL; // Redirige vers la page de connexion
+    });
 
-// Exécuter la fonction au chargement de la page
-document.addEventListener('DOMContentLoaded', fetchUserData);
-    </script>
+    // Exécuter la fonction au chargement de la page
+    document.addEventListener('DOMContentLoaded', fetchUserData);
+</script>
 </body>
 </html>
 </body>
