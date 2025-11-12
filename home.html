@@ -348,12 +348,11 @@
         const token = params.get('token');
 
         if (token) {
-            // Stocke le token pour les appels futurs (Local Storage)
+            // ⭐ Stocke IMMÉDIATEMENT le token
             localStorage.setItem('eb_session_token', token);
             
-            // Nettoie l'URL pour la sécurité et la propreté (enlève le #token=...)
-            // Cela ne recharge pas la page.
-            window.history.replaceState(null, null, ' ');
+            // Nettoie l'URL pour la sécurité et la propreté
+            window.history.replaceState(null, null, window.location.pathname);
             return true; // Token trouvé
         }
         return false; // Pas de token
@@ -361,11 +360,7 @@
 
     // 2. Appel de l'API avec le Token
     async function fetchUserData() {
-        
-        // Tente de récupérer un token si on vient d'être redirigé par le Worker
-        processTokenFromUrl(); 
-        
-        // Récupère le token stocké
+        // Le token a été stocké par processTokenFromUrl()
         const token = localStorage.getItem('eb_session_token');
 
         if (!token) {
@@ -375,7 +370,7 @@
         }
 
         try {
-            // ⭐ ENVOI DU TOKEN DANS L'EN-TÊTE AUTHORIZATION
+            // ENVOI DU TOKEN DANS L'EN-TÊTE AUTHORIZATION
             const response = await fetch(`${WORKER_URL}/api/user`, {
                 headers: {
                     'Authorization': `Bearer ${token}` 
@@ -385,7 +380,7 @@
             // Gère la déconnexion en cas d'expiration du token
             if (response.status === 401) {
                  console.error("Session expirée. Redirection vers la page de connexion.");
-                 localStorage.removeItem('eb_session_token'); // Supprime le token invalide
+                 localStorage.removeItem('eb_session_token');
                  window.location.href = GITHUB_LOGIN_URL;
                  return;
             }
@@ -414,15 +409,19 @@
         }
     }
     
-    // ⭐ 3. Gère la Déconnexion (suppression du token local)
+    // 3. Gère la Déconnexion (suppression du token local)
     document.getElementById('logout-link').addEventListener('click', (e) => {
-        e.preventDefault(); // Empêche l'action par défaut du lien
-        localStorage.removeItem('eb_session_token'); // Supprime le token
-        window.location.href = GITHUB_LOGIN_URL; // Redirige vers la page de connexion
+        e.preventDefault();
+        localStorage.removeItem('eb_session_token');
+        window.location.href = GITHUB_LOGIN_URL;
     });
 
-    // Exécuter la fonction au chargement de la page
-    document.addEventListener('DOMContentLoaded', fetchUserData);
+    // ⭐ POINT CRUCIAL : On appelle processTokenFromUrl() avant d'appeler fetchUserData
+    document.addEventListener('DOMContentLoaded', () => {
+        // Traite le token de l'URL AVANT de faire l'appel API
+        processTokenFromUrl(); 
+        fetchUserData();
+    });
 </script>
 </body>
 </html>
