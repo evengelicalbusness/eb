@@ -336,7 +336,7 @@
         </div>
     </footer>
 
-   <script>
+    <script>
     // Configuration
     const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
     const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html';
@@ -348,10 +348,10 @@
         const token = params.get('token');
 
         if (token) {
-            // Stocke IMMÉDIATEMENT le token (Résout le problème de timing)
+            // STOCKAGE IMMÉDIAT du token (Résout le problème de timing/premier chargement)
             localStorage.setItem('eb_session_token', token);
             
-            // Nettoie l'URL pour la propreté
+            // Nettoie l'URL
             window.history.replaceState(null, null, window.location.pathname);
             return true;
         }
@@ -369,7 +369,7 @@
         }
 
         try {
-            // ENVOI DU TOKEN DANS L'EN-TÊTE AUTHORIZATION
+            // Appel API avec le token d'autorisation
             const response = await fetch(`${WORKER_URL}/api/user`, {
                 headers: {
                     'Authorization': `Bearer ${token}` 
@@ -377,7 +377,6 @@
             });
 
             if (response.status === 401) {
-                 // Session expirée ou invalide
                  localStorage.removeItem('eb_session_token');
                  window.location.href = GITHUB_LOGIN_URL;
                  return;
@@ -389,7 +388,7 @@
 
             const data = await response.json();
             
-            // 1. Afficher le solde
+            // --- GESTION DU SOLDE ---
             const soldeElement = document.getElementById('user-solde');
             let soldeValue = Number(data.solde); 
             
@@ -397,16 +396,16 @@
                  soldeValue = 0;
             }
             
-            // Formatage du solde
             const formattedSolde = new Intl.NumberFormat('fr-HT', { 
                 style: 'decimal', 
                 minimumFractionDigits: 0 
             }).format(soldeValue);
             
-            // CORRECTION: Utilisation de 'HTE' pour l'unité monétaire
-            soldeElement.textContent = `${formattedSolde} HTG`;
+            soldeElement.textContent = `${formattedSolde} HTE`;
 
-            // 2. Afficher l'email (Correction robuste de l'email)
+            // --- GESTION DE L'EMAIL ---
+            // L'email est dans le JWT et la réponse API. 
+            // On s'assure qu'il est une chaîne non vide avant de l'afficher.
             const userEmail = data.email && String(data.email).trim() !== '' ? data.email : "Mon compte";
             document.getElementById('user-account-link').textContent = userEmail;
 
@@ -417,12 +416,11 @@
         }
     }
     
-    // 3. Gère la Déconnexion (maintenant avec le bon ID)
-    // NOTE : Le href='#' est important ici pour que le preventDefault fonctionne bien
+    // 3. Gère la Déconnexion 
     document.getElementById('logout-link').addEventListener('click', (e) => {
-        e.preventDefault(); // Empêche le chargement de la page
-        localStorage.removeItem('eb_session_token'); // Supprime le token
-        window.location.href = GITHUB_LOGIN_URL; // Redirige vers la page de connexion
+        e.preventDefault();
+        localStorage.removeItem('eb_session_token');
+        window.location.href = GITHUB_LOGIN_URL;
     });
 
     // 4. Exécution (Assure le bon timing)
