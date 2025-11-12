@@ -337,7 +337,11 @@
     </footer>
 
     <script>
+        // L'URL du Worker reste correcte pour les appels API
         const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
+        
+        // ⭐ AJOUT : URL de l'index.html sur GitHub Pages pour la redirection de sécurité
+        const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html'; 
 
         async function fetchUserData() {
             try {
@@ -345,9 +349,9 @@
                 const response = await fetch(`${WORKER_URL}/api/user`);
 
                 if (response.status === 401) {
-                    // Session expirée ou non autorisée
+                    // ⭐ CORRIGÉ : Redirection vers l'index.html sur GitHub Pages
                     console.error("Session expirée. Redirection vers la page de connexion.");
-                    window.location.href = `${WORKER_URL}/index.html`;
+                    window.location.href = GITHUB_LOGIN_URL;
                     return;
                 }
                 
@@ -357,10 +361,12 @@
 
                 const data = await response.json();
                 
-                // 1. Afficher le solde
+                // 1. Afficher le solde (utilisant la valeur stockée dans le JWT, garantie d'être un nombre ou 0)
                 const soldeElement = document.getElementById('user-solde');
-                // Formater le solde avec une virgule et deux décimales, si nécessaire, ou simplement afficher l'entier.
-                const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(data.solde || 0);
+                // Assurez-vous d'afficher 0 si le solde est 0
+                const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
+
+                const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
                 soldeElement.textContent = `${formattedSolde} HTE`;
 
                 // 2. Afficher l'email ou le statut dans le bouton "Mon compte"
@@ -369,7 +375,7 @@
 
             } catch (error) {
                 console.error('Erreur API:', error);
-                // Si l'API échoue pour une raison inconnue, on affiche une erreur générique
+                // Si l'API échoue, on affiche l'erreur comme avant.
                 document.getElementById('user-solde').textContent = 'Erreur';
                 document.getElementById('user-account-link').textContent = 'Erreur';
             }
@@ -379,11 +385,13 @@
         document.addEventListener('DOMContentLoaded', fetchUserData);
         
         // Gérer la déconnexion sur le bouton dédié
+        // (Le lien Déconnexion a déjà l'URL du Worker : <a href="https://eb.mijocomplexe.workers.dev/logout"...)
         document.getElementById('user-account-link').addEventListener('click', (e) => {
-            // Ici, vous pouvez rediriger l'utilisateur vers une page de profil ou de paramètres
             e.preventDefault(); 
             alert("Redirection vers la page Mon Compte ou Profil. (Non implémentée)");
         });
     </script>
+</body>
+</html>
 </body>
 </html>
