@@ -188,20 +188,63 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            /* 1. Ajustement du Header sur tablette/mobile */
             .header-top {
                 flex-direction: column;
                 gap: 15px;
+                padding: 15px 10px; /* Moins de padding */
             }
             .user-info {
                 width: 100%;
-                justify-content: space-around;
+                justify-content: space-between; /* Espacement optimal */
+                gap: 5px; /* Réduit l'espace entre les éléments */
             }
+            .wallet-display {
+                padding: 6px 10px;
+                font-size: 1em;
+                white-space: nowrap; /* Empêche le solde de se couper */
+            }
+            .user-button {
+                padding: 6px 10px;
+                font-size: 0.9em;
+                white-space: nowrap;
+            }
+            
+            /* 2. Section Hero */
             .slogan {
                 font-size: 1.5em;
+                margin-bottom: 20px;
             }
             .quick-links {
-                justify-content: space-between;
+                gap: 8px; /* Réduit l'espace entre les liens rapides */
+            }
+            .quick-link-item {
+                flex: 1 1 auto; /* Permet aux liens de prendre l'espace disponible */
+                max-width: 45%; /* Affiche 2 par ligne */
+            }
+
+            /* 3. Grille des Flyers (Sur mobile, une seule colonne) */
+            .section-grid {
+                grid-template-columns: 1fr; /* Force une seule colonne */
+                gap: 20px;
+            }
+            
+            .content-container {
+                margin: 30px auto;
+                padding: 0 10px;
+            }
+            
+            /* 4. Footer */
+            .footer-grid {
+                grid-template-columns: 1fr; /* Footer en une seule colonne sur mobile */
+            }
+        }
+
+        /* Ajout d'une règle pour les très petits écrans si nécessaire */
+        @media (max-width: 400px) {
+            .quick-link-item {
+                max-width: 100%; /* Un seul lien rapide par ligne */
             }
         }
     </style>
