@@ -209,14 +209,14 @@
 <body>
 
     <header class="header-top">
-        <img class="header-logo" src="https://i.postimg.cc/YSMxxFXr/IMG-20251111-WA0000.jpg" alt="Logo EB">
-        <div class="user-info">
-            <div class="wallet-display">
-                <span id="user-solde">... HTE</span> </div>
-            <a href="#" class="user-button" id="user-account-link">Mon compte</a>
-            <a href="https://eb.mijocomplexe.workers.dev/logout" class="user-button" style="background-color: #dc3545;">Déconnexion</a>
-        </div>
-    </header>
+    <img class="header-logo" src="https://i.postimg.cc/YSMxxFXr/IMG-20251111-WA0000.jpg" alt="Logo EB">
+    <div class="user-info">
+        <div class="wallet-display">
+            <span id="user-solde">... HTG</span> </div>
+        <a href="#" class="user-button" id="user-account-link">Mon compte</a>
+        <a href="#" class="user-button" id="logout-link" style="background-color: #dc3545;">Déconnexion</a>
+    </div>
+</header>
 
     <section class="hero-section">
         <p class="slogan">« Pour un Haïti plus simple, plus rapide, <strong>plus ouvert</strong> »</p>
@@ -343,28 +343,27 @@
 
     // 1. Gère le Token de la Redirection (URL Hash)
     function processTokenFromUrl() {
-        const hash = window.location.hash.substring(1); // Récupère le contenu après le '#'
+        const hash = window.location.hash.substring(1);
         const params = new URLSearchParams(hash);
         const token = params.get('token');
 
         if (token) {
-            // ⭐ Stocke IMMÉDIATEMENT le token
+            // Stocke IMMÉDIATEMENT le token (Résout le problème de timing)
             localStorage.setItem('eb_session_token', token);
             
-            // Nettoie l'URL pour la sécurité et la propreté
+            // Nettoie l'URL pour la propreté
             window.history.replaceState(null, null, window.location.pathname);
-            return true; // Token trouvé
+            return true;
         }
-        return false; // Pas de token
+        return false;
     }
 
     // 2. Appel de l'API avec le Token
     async function fetchUserData() {
-        // Le token a été stocké par processTokenFromUrl()
+        
         const token = localStorage.getItem('eb_session_token');
 
         if (!token) {
-            // Si pas de token, on redirige vers la page de connexion
             window.location.href = GITHUB_LOGIN_URL;
             return;
         }
@@ -377,9 +376,8 @@
                 }
             });
 
-            // Gère la déconnexion en cas d'expiration du token
             if (response.status === 401) {
-                 console.error("Session expirée. Redirection vers la page de connexion.");
+                 // Session expirée ou invalide
                  localStorage.removeItem('eb_session_token');
                  window.location.href = GITHUB_LOGIN_URL;
                  return;
@@ -393,12 +391,8 @@
             
             // 1. Afficher le solde
             const soldeElement = document.getElementById('user-solde');
-            
-            // ⭐ LIGNE CORRIGÉE : Assure que la valeur est un nombre (ou 0 par défaut)
-            // On utilise Number() pour s'assurer que même une chaîne vide est traitée comme 0.
             let soldeValue = Number(data.solde); 
             
-            // Si la conversion échoue (NaN), ou si la valeur est null/undefined, on utilise 0.
             if (isNaN(soldeValue) || soldeValue === null || soldeValue === undefined) {
                  soldeValue = 0;
             }
@@ -409,10 +403,12 @@
                 minimumFractionDigits: 0 
             }).format(soldeValue);
             
-            // ⭐ Affiche le solde formaté
+            // CORRECTION: Utilisation de 'HTE' pour l'unité monétaire
             soldeElement.textContent = `${formattedSolde} HTG`;
-            // 2. Afficher l'email
-            document.getElementById('user-account-link').textContent = data.email || "Mon compte";
+
+            // 2. Afficher l'email (Correction robuste de l'email)
+            const userEmail = data.email && String(data.email).trim() !== '' ? data.email : "Mon compte";
+            document.getElementById('user-account-link').textContent = userEmail;
 
         } catch (error) {
             console.error('Erreur API:', error);
@@ -421,16 +417,16 @@
         }
     }
     
-    // 3. Gère la Déconnexion (suppression du token local)
+    // 3. Gère la Déconnexion (maintenant avec le bon ID)
+    // NOTE : Le href='#' est important ici pour que le preventDefault fonctionne bien
     document.getElementById('logout-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('eb_session_token');
-        window.location.href = GITHUB_LOGIN_URL;
+        e.preventDefault(); // Empêche le chargement de la page
+        localStorage.removeItem('eb_session_token'); // Supprime le token
+        window.location.href = GITHUB_LOGIN_URL; // Redirige vers la page de connexion
     });
 
-    // ⭐ POINT CRUCIAL : On appelle processTokenFromUrl() avant d'appeler fetchUserData
+    // 4. Exécution (Assure le bon timing)
     document.addEventListener('DOMContentLoaded', () => {
-        // Traite le token de l'URL AVANT de faire l'appel API
         processTokenFromUrl(); 
         fetchUserData();
     });
