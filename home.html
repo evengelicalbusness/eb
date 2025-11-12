@@ -393,12 +393,24 @@
             
             // 1. Afficher le solde
             const soldeElement = document.getElementById('user-solde');
-            const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
+            
+            // ⭐ LIGNE CORRIGÉE : Assure que la valeur est un nombre (ou 0 par défaut)
+            // On utilise Number() pour s'assurer que même une chaîne vide est traitée comme 0.
+            let soldeValue = Number(data.solde); 
+            
+            // Si la conversion échoue (NaN), ou si la valeur est null/undefined, on utilise 0.
+            if (isNaN(soldeValue) || soldeValue === null || soldeValue === undefined) {
+                 soldeValue = 0;
+            }
             
             // Formatage du solde
-            const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
-            soldeElement.textContent = `${formattedSolde} HTE`;
-
+            const formattedSolde = new Intl.NumberFormat('fr-HT', { 
+                style: 'decimal', 
+                minimumFractionDigits: 0 
+            }).format(soldeValue);
+            
+            // ⭐ Affiche le solde formaté
+            soldeElement.textContent = `${formattedSolde} HTG`;
             // 2. Afficher l'email
             document.getElementById('user-account-link').textContent = data.email || "Mon compte";
 
