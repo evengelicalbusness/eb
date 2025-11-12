@@ -337,59 +337,76 @@
     </footer>
 
     <script>
-        // L'URL du Worker reste correcte pour les appels API
-        const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
-        
-        // ⭐ AJOUT : URL de l'index.html sur GitHub Pages pour la redirection de sécurité
-        const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html'; 
+        // URL du Worker reste correcte pour les appels API
+const WORKER_URL = 'https://eb.mijocomplexe.workers.dev';
+const GITHUB_LOGIN_URL = 'https://evengelicalbusness.github.io/eb/index.html';
 
-        async function fetchUserData() {
-            try {
-                // Appel à l'endpoint sécurisé du Worker
-                const response = await fetch(`${WORKER_URL}/api/user`);
+// 1. Fonction pour extraire le token de l'URL et le stocker
+function processTokenFromUrl() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get('token');
 
-                if (response.status === 401) {
-                    // ⭐ CORRIGÉ : Redirection vers l'index.html sur GitHub Pages
-                    console.error("Session expirée. Redirection vers la page de connexion.");
-                    window.location.href = GITHUB_LOGIN_URL;
-                    return;
-                }
-                
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des données utilisateur.');
-                }
+    if (token) {
+        // Stocke le token pour les appels futurs
+        localStorage.setItem('eb_session_token', token);
+        // Nettoie l'URL pour la sécurité et la propreté (enlève le #token=...)
+        window.location.hash = ''; 
+    }
+}
 
-                const data = await response.json();
-                
-                // 1. Afficher le solde (utilisant la valeur stockée dans le JWT, garantie d'être un nombre ou 0)
-                const soldeElement = document.getElementById('user-solde');
-                // Assurez-vous d'afficher 0 si le solde est 0
-                const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
+async function fetchUserData() {
+    // S'assurer que nous avons vérifié le token dans l'URL avant de faire l'appel
+    processTokenFromUrl(); 
+    
+    const token = localStorage.getItem('eb_session_token');
 
-                const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
-                soldeElement.textContent = `${formattedSolde} HTE`;
+    if (!token) {
+        // Si aucun token, même après vérification d'URL, on redirige
+        window.location.href = GITHUB_LOGIN_URL;
+        return;
+    }
 
-                // 2. Afficher l'email ou le statut dans le bouton "Mon compte"
-                const accountLink = document.getElementById('user-account-link');
-                accountLink.textContent = data.email || "Mon compte";
-
-            } catch (error) {
-                console.error('Erreur API:', error);
-                // Si l'API échoue, on affiche l'erreur comme avant.
-                document.getElementById('user-solde').textContent = 'Erreur';
-                document.getElementById('user-account-link').textContent = 'Erreur';
+    try {
+        // ⭐ Appel à l'endpoint en envoyant le Token dans l'en-tête Authorization
+        const response = await fetch(`${WORKER_URL}/api/user`, {
+            headers: {
+                'Authorization': `Bearer ${token}` 
             }
+        });
+
+        // Le reste de la logique de gestion des réponses reste la même...
+        if (response.status === 401) {
+             console.error("Session expirée. Redirection vers la page de connexion.");
+             localStorage.removeItem('eb_session_token'); // Supprime le token invalide
+             window.location.href = GITHUB_LOGIN_URL;
+             return;
+        }
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des données utilisateur.');
         }
 
-        // Exécuter la fonction au chargement de la page
-        document.addEventListener('DOMContentLoaded', fetchUserData);
+        const data = await response.json();
         
-        // Gérer la déconnexion sur le bouton dédié
-        // (Le lien Déconnexion a déjà l'URL du Worker : <a href="https://eb.mijocomplexe.workers.dev/logout"...)
-        document.getElementById('user-account-link').addEventListener('click', (e) => {
-            e.preventDefault(); 
-            alert("Redirection vers la page Mon Compte ou Profil. (Non implémentée)");
-        });
+        // 1. Afficher le solde
+        const soldeElement = document.getElementById('user-solde');
+        const soldeValue = data.solde === null || data.solde === undefined ? 0 : data.solde;
+        const formattedSolde = new Intl.NumberFormat('fr-HT', { style: 'decimal', minimumFractionDigits: 0 }).format(soldeValue);
+        soldeElement.textContent = `${formattedSolde} HTE`;
+
+        // 2. Afficher l'email
+        document.getElementById('user-account-link').textContent = data.email || "Mon compte";
+
+    } catch (error) {
+        console.error('Erreur API:', error);
+        document.getElementById('user-solde').textContent = 'Erreur';
+        document.getElementById('user-account-link').textContent = 'Erreur';
+    }
+}
+
+// Exécuter la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', fetchUserData);
     </script>
 </body>
 </html>
